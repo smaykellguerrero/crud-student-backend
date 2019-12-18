@@ -14,7 +14,7 @@ app
 
 
     .listen(port, function () {
-        console.log(`server running on port${port}`)
+        console.log(`server running on port ${port}`)
         console.log(`GraphQL server running on http://localhost:${port}/graphql`)
     })
 
