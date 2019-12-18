@@ -217,6 +217,7 @@ const mutation = new GraphQLObjectType({
                     status=$9
                     where id=$10
                     returning
+                    id,
                     first_name as "firstName",
                     last_name as "lastName",
                     sex,
@@ -228,7 +229,7 @@ const mutation = new GraphQLObjectType({
                     address,
                     status
                 `;
-                return db.one(query, [args.firstName, args.lastName, args.sex, args.email, args.phone, args.idSchool, args.ubigeo, args.address, args.status,ars.id])
+                return db.one(query, [args.firstName, args.lastName, args.sex, args.email, args.phone, args.idSchool, args.ubigeo, args.address, args.status,args.id])
                     .then(data => data)
                     .catch(error => error);
             }
