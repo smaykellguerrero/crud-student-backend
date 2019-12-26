@@ -20,7 +20,6 @@ const School = new GraphQLObjectType({
         faculty: { type: new GraphQLNonNull(GraphQLString) }
     }
 })
-
 const Student = new GraphQLObjectType({
     name: 'Student',
     fields: {
@@ -30,11 +29,12 @@ const Student = new GraphQLObjectType({
         sex: { type: new GraphQLNonNull(GraphQLString) },
         email: { type: new GraphQLNonNull(GraphQLString) },
         phone: { type: new GraphQLNonNull(GraphQLString) },
+        idFaculty: { type: new GraphQLNonNull(GraphQLID) },
         idSchool: { type: new GraphQLNonNull(GraphQLID) },
         school: { type: new GraphQLNonNull(GraphQLString) },
         ubigeo: { type: new GraphQLNonNull(GraphQLString) },
         address: { type: new GraphQLNonNull(GraphQLString) },
-        status: { type: new GraphQLNonNull(GraphQLBoolean) }
+        status: { type: new GraphQLNonNull(GraphQLString) }
     }
 })
 
@@ -51,7 +51,6 @@ const query = new GraphQLObjectType({
                     .catch(error => error)
             }
         },
-
         schoolsAll: {
             type: new GraphQLList(School),
             resolve: () => {
@@ -70,7 +69,6 @@ const query = new GraphQLObjectType({
                     .catch(error => error)
             }
         },
-
         schoolsByIdFaculty: {
             type: new GraphQLList(School),
             args: {
@@ -93,7 +91,6 @@ const query = new GraphQLObjectType({
                     .catch(error => error)
             }
         },
-
         studentsAll: {
             type: new GraphQLList(Student),
             resolve: () => {
@@ -105,6 +102,7 @@ const query = new GraphQLObjectType({
                     s.sex,
                     s.email,
                     s.phone,
+                    (select sh.id_faculty from school as sh where sh.id=s.id_school) as "idFaculty",
                     s.id_school as "idSchool",
                     (select school from school where id=s.id_school) as school,
                     s.ubigeo,
@@ -131,6 +129,7 @@ const query = new GraphQLObjectType({
                     s.sex,
                     s.email,
                     s.phone,
+                    (select sh.id_faculty from school as sh where sh.id=s.id_school) as "idFaculty",
                     s.id_school as "idSchool",
                     (select school from school where id=s.id_school) as school,
                     s.ubigeo,
@@ -162,7 +161,7 @@ const mutation = new GraphQLObjectType({
                 idSchool: { type: new GraphQLNonNull(GraphQLID) },
                 ubigeo: { type: new GraphQLNonNull(GraphQLString) },
                 address: { type: new GraphQLNonNull(GraphQLString) },
-                status: { type: new GraphQLNonNull(GraphQLBoolean) }
+                status: { type: new GraphQLNonNull(GraphQLString) }
             },
             resolve: (_, args) => {
                 const query = `
@@ -186,7 +185,6 @@ const mutation = new GraphQLObjectType({
                     .catch(error => error);
             }
         },
-
         updateStudent: {
             type: Student,
             args: {
@@ -198,9 +196,8 @@ const mutation = new GraphQLObjectType({
                 idSchool: { type: new GraphQLNonNull(GraphQLID) },
                 ubigeo: { type: new GraphQLNonNull(GraphQLString) },
                 address: { type: new GraphQLNonNull(GraphQLString) },
-                status: { type: new GraphQLNonNull(GraphQLBoolean) },
-                id: {type: new GraphQLNonNull(GraphQLID)}
-
+                status: { type: new GraphQLNonNull(GraphQLString) },
+                id: { type: new GraphQLNonNull(GraphQLID) }
             },
             resolve: (_, args) => {
                 const query = `
@@ -223,18 +220,18 @@ const mutation = new GraphQLObjectType({
                     sex,
                     email,
                     phone,
+                    (select sh.id_faculty from school as sh where sh.id=id_school) as "idFaculty",
                     id_school as "idSchool",
                     (select school from school where id = $6) as school,
                     ubigeo,
                     address,
                     status
                 `;
-                return db.one(query, [args.firstName, args.lastName, args.sex, args.email, args.phone, args.idSchool, args.ubigeo, args.address, args.status,args.id])
+                return db.one(query, [args.firstName, args.lastName, args.sex, args.email, args.phone, args.idSchool, args.ubigeo, args.address, args.status, args.id])
                     .then(data => data)
                     .catch(error => error);
             }
         },
-
         deleteStudent: {
             type: GraphQLBoolean,
             args: {
@@ -249,5 +246,4 @@ const mutation = new GraphQLObjectType({
         }
     }
 })
-
 module.exports = new GraphQLSchema({ query, mutation })
